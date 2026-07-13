@@ -12,6 +12,9 @@ import SinglePostPage from './pages/Feed/SinglePost/SinglePost';
 import LoginPage from './pages/Auth/Login';
 import SignupPage from './pages/Auth/Signup';
 import './App.css';
+import { getBaseUrl } from './api-config';
+
+const baseUrl = getBaseUrl();
 
 const App = props => {
   const [showBackdrop, setShowBackdrop] = useState(false);
@@ -74,7 +77,7 @@ const App = props => {
     setAuthLoading(true);
 
     try {
-      const res = await fetch('http://localhost:8080/auth/login', {
+      const res = await fetch(`${baseUrl}/auth/login`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json'
@@ -119,7 +122,7 @@ const App = props => {
     setAuthLoading(true);
 
     try {
-      const res = await fetch('http://localhost:8080/auth/signup', {
+      const res = await fetch(`${baseUrl}/auth/signup`, {
         method: 'PUT',
         headers: {
           'Content-Type': 'application/json'

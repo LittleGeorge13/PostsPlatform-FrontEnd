@@ -2,6 +2,9 @@ import React, { useEffect, useState } from 'react';
 
 import Image from '../../../components/Image/Image';
 import './SinglePost.css';
+import { getBaseUrl } from '../../../api-config';
+
+const baseUrl = getBaseUrl();
 
 const SinglePost = props => {
   const [title, setTitle] = useState('');
@@ -15,7 +18,7 @@ const SinglePost = props => {
       const postId = props.match.params.postId;
 
       try {
-        const res = await fetch('http://localhost:8080/feed/posts/' + postId, {
+        const res = await fetch(`${baseUrl}/feed/posts/` + postId, {
           headers: {
             Authorization: 'Bearer ' + props.token,
           },
@@ -28,8 +31,7 @@ const SinglePost = props => {
         setAuthor(resData.post.creator.name);
         setDate(new Date(resData.post.createdAt).toLocaleDateString('en-US'));
         setContent(resData.post.content);
-        setImage('http://localhost:8080/' + resData.post.imageUrl);
-        console.log('http://localhost:8080/' + resData.post.imageUrl);
+        setImage(`${baseUrl}/` + resData.post.imageUrl);
       } catch (err) {
         console.log(err);
       }

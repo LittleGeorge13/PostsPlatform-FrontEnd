@@ -8,7 +8,10 @@ import Paginator from '../../components/Paginator/Paginator';
 import Loader from '../../components/Loader/Loader';
 import ErrorHandler from '../../components/ErrorHandler/ErrorHandler';
 import './Feed.css';
+import { getBaseUrl } from '../../api-config';
 // import image from '../../components/Image/Image';
+
+const baseUrl = getBaseUrl();
 
 const Feed = ({
   userId,
@@ -45,7 +48,7 @@ const Feed = ({
     }
 
     try {
-      const res = await fetch('http://localhost:8080/feed/posts?page=' + page, {
+      const res = await fetch(`${baseUrl}/feed/posts?page=` + page, {
         method: 'GET',
         headers: {
           Authorization: 'Bearer ' + token,
@@ -72,7 +75,7 @@ const Feed = ({
   useEffect(() => {
     const fetchStatus = async () => {
       try {
-        const res = await fetch('http://localhost:8080/feed/status', {
+        const res = await fetch(`${baseUrl}/feed/status`, {
           method: 'GET',
           headers: {
             Authorization: 'Bearer ' + token,
@@ -96,7 +99,7 @@ const Feed = ({
     event.preventDefault();
 
     try {
-      const res = await fetch('http://localhost:8080/feed/status', {
+      const res = await fetch(`${baseUrl}/feed/status`, {
         method: 'PUT',
         headers: {
           'Content-Type': 'application/json',
@@ -138,10 +141,10 @@ const Feed = ({
     formData.append('title', postData.title);
     formData.append('content', postData.content);
     formData.append('image', postData.image);
-    let url = 'http://localhost:8080/feed/posts';
+    let url = `${baseUrl}/feed/posts`;
     let method='POST';
     if (editPost) {
-      url = 'http://localhost:8080/feed/posts/' + editPost._id;
+      url = `${baseUrl}/feed/posts/` + editPost._id;
       method = 'PUT';
     }
 
@@ -193,7 +196,7 @@ const Feed = ({
     setPostsLoading(true);
 
     try {
-      const res = await fetch('http://localhost:8080/feed/posts/' + postId, {
+      const res = await fetch(`${baseUrl}/feed/posts/` + postId, {
         method:'DELETE',
         headers: {
           Authorization: 'Bearer ' + token,
