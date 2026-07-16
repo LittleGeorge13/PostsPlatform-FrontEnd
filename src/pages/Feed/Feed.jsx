@@ -1,4 +1,5 @@
 import React, { Fragment, useCallback, useEffect, useState } from 'react';
+ import { io } from 'socket.io-client';
 
 import Post from '../../components/Feed/Post/Post';
 import Button from '../../components/Button/Button';
@@ -72,6 +73,31 @@ const Feed = ({
     }
   }, [catchError, postPage, token]);
 
+  const addPost = useCallback(post => {
+    setPosts(prevPosts => {
+      const updatedPosts = [...prevPosts];
+      if (postPage === 1) {
+        if (prevPosts.length >= 2) {
+          updatedPosts.pop();
+        }
+        updatedPosts.unshift(post);
+      }
+      return updatedPosts;
+    });
+    setTotalPosts(prevTotal => prevTotal + 1);
+  }, [postPage]);
+
+  const updatePost = useCallback(post => {
+    setPosts(prevPosts => {
+      const updatedPosts = [...prevPosts];
+      const updatedPostIndex = updatedPosts.findIndex(p => p._id === post._id);
+      if (updatedPostIndex !== -1) {
+        updatedPosts[updatedPostIndex] = post;
+      }
+      return updatedPosts;
+    });
+  }, []);
+
   useEffect(() => {
     const fetchStatus = async () => {
       try {
@@ -93,7 +119,23 @@ const Feed = ({
 
     fetchStatus();
     loadPosts();
-  }, [catchError, loadPosts, token]);
+    const socket = io(baseUrl);
+    socket.on('posts', (data) => {
+      switch (data.action) {
+        case 'create':
+          addPost(data.post);
+          break;
+        case 'update':
+          updatePost(data.post);
+          break;
+        case 'delete':
+          loadPosts();
+          break;
+        default:
+          break;
+      }
+    });
+  }, [catchError, loadPosts, token, addPost, updatePost]);
 
   const statusUpdateHandler = async event => {
     event.preventDefault();
@@ -159,23 +201,6 @@ const Feed = ({
       if (res.status !== 200 && res.status !== 201) {
         throw new Error('Creating or editing a post failed!');
       }
-      const resData = await res.json();
-      const post = {
-        _id: resData.post._id,
-        title: resData.post.title,
-        content: resData.post.content,
-        creator: resData.post.creator,
-        createdAt: resData.post.createdAt
-      };
-
-      let updatedPosts = [...posts];
-      if (editPost) {
-        const postIndex = posts.findIndex(p => p._id === editPost._id);
-        updatedPosts[postIndex] = post;
-      } else if (posts.length < 2) {
-        updatedPosts = posts.concat(post);
-      }
-      setPosts(updatedPosts);
       setIsEditing(false);
       setEditPost(null);
       setEditLoading(false);
@@ -206,7 +231,6 @@ const Feed = ({
         throw new Error('Deleting a post failed!');
       }
       const resData = await res.json();
-      console.log(resData);
       const updatedPosts = posts.filter(p => p._id !== postId);
       setPosts(updatedPosts);
       setPostsLoading(false);
